@@ -1,6 +1,6 @@
 services:
   # LangGraph FastAPI / LangServe Service
-  rag-api:
+  agents-service:
     build: .
     ports:
       - "8000:8000"
@@ -65,6 +65,7 @@ services:
       sleep 5 && 
       ollama pull deepseek-ocr || true && 
       ollama pull nomic-embed-text && 
+      ollama pull zylonai/multilingual-e5-large && 
       ollama pull llama3 && 
       wait"
     networks:

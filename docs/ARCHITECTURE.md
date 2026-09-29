@@ -8,15 +8,15 @@ This document serves as the comprehensive engineering guide and template bluepri
 
 1. [High-Level Architectural Mental Model](#1-high-level-architectural-mental-model)
 2. [Complete Directory & Component Walkthrough](#2-complete-directory--component-walkthrough)
-3. [State Management Principles (`app/state/`)](#3-state-management-principles-(`app/state/`))
+3. [State Management Principles (`app/state/`)](#3-state-management-principles-appstate)
 4. [Agentic Patterns Implemented](#4-agentic-patterns-implemented)
    - [A. Corrective RAG (CRAG)](#a-corrective-rag-crag)
    - [B. Two-Stage Cross-Encoder Re-ranking](#b-two-stage-cross-encoder-re-ranking)
    - [C. Actor-Critic Reflection Loop](#c-actor-critic-reflection-loop)
    - [D. Distributed Semantic & Exact Redis Caching](#d-distributed-semantic--exact-redis-caching)
    - [E. Dual-Layer Memory Architecture](#e-dual-layer-memory-architecture)
-5. [Data Ingestion Pipeline (`app/nodes/ingest_nodes.py`)](#5-data-ingestion-pipeline)
-6. [Observability & Evaluation (`tests/`)](#6-observability--evaluation)
+5. [Data Ingestion Pipeline (`app/nodes/ingest_nodes.py`)](#5-data-ingestion-pipeline-appnodesingest_nodespy)
+6. [Observability & Evaluation (`tests/`)](#6-observability--evaluation-tests)
 7. [Production Deployment & Containerization](#7-production-deployment--containerization)
 8. [Checklist for Adapting this Template to New Projects](#8-checklist-for-adapting-this-template-to-new-projects)
 
@@ -172,9 +172,9 @@ By setting `total=False`, individual nodes only return the specific fields they 
 ### A. Corrective RAG (CRAG)
 
 * **Problem**: If internal search returns documents that don't answer the user's question, drafting immediately leads to hallucination.
-* **Solution**: The [`grade_documents`](file:///home/ahmad/LangChain-LangGraph-LangFlow-LangSmith/app/nodes/crag_nodes.py#L18) node inspects retrieved chunks:
+* **Solution**: The [`grade_documents`](../app/nodes/crag_nodes.py#L18) node inspects retrieved chunks:
   * **Relevant**: Proceeds to re-ranking.
-  * **Irrelevant**: Automatically triggers [`rewrite_query`](file:///home/ahmad/LangChain-LangGraph-LangFlow-LangSmith/app/nodes/crag_nodes.py#L52) to optimize the query for search engines, falls back to `search_web`, and clears stale internal chunks.
+  * **Irrelevant**: Automatically triggers [`rewrite_query`](../app/nodes/crag_nodes.py#L52) to optimize the query for search engines, falls back to `search_web`, and clears stale internal chunks.
 
 ### B. Two-Stage Cross-Encoder Re-ranking
 
@@ -191,9 +191,9 @@ By setting `total=False`, individual nodes only return the specific fields they 
 
 ### D. Distributed Semantic & Exact Redis Caching
 
-* **Pre-Check Bypass**: When a request enters, [`check_cache`](file:///home/ahmad/LangChain-LangGraph-LangFlow-LangSmith/app/nodes/cache_nodes.py#L5) queries Redis with `SHA256(normalized_query)`.
+* **Pre-Check Bypass**: When a request enters, [`check_cache`](../app/nodes/cache_nodes.py#L5) queries Redis with `SHA256(normalized_query)`.
 * If a cache hit occurs, the entire agent pipeline (LLMs, vectors, routers, re-rankers) is bypassed, returning validated answers in $< 5\text{ ms}$.
-* On cache misses, [`save_cache`](file:///home/ahmad/LangChain-LangGraph-LangFlow-LangSmith/app/nodes/cache_nodes.py#L25) persists only approved answers after reviewer sign-off with configurable TTL (default: 24h).
+* On cache misses, [`save_cache`](../app/nodes/cache_nodes.py#L25) persists only approved answers after reviewer sign-off with configurable TTL (default: 24h).
 
 ### E. Dual-Layer Memory Architecture
 
@@ -204,7 +204,7 @@ By setting `total=False`, individual nodes only return the specific fields they 
 
 ## 5. Data Ingestion Pipeline (`app/nodes/ingest_nodes.py`)
 
-Ingestion is separated into its own compiled subgraph ([`app/graphs/subgraphs/ingestion.py`](file:///home/ahmad/LangChain-LangGraph-LangFlow-LangSmith/app/graphs/subgraphs/ingestion.py)):
+Ingestion is separated into its own compiled subgraph ([`app/graphs/subgraphs/ingestion.py`](../app/graphs/subgraphs/ingestion.py)):
 
 1. **Hybrid Extraction**: Native digital PDF text is extracted with PyMuPDF in $< 0.1\text{ s}$ per page. If a page has little/no text (scanned image), the pipeline lazily calls Ollama's vision model (`deepseek-ocr`).
 2. **Sanitization**: Regular expressions strip OCR bounding-box artifacts and excessive newlines.
@@ -217,8 +217,8 @@ Ingestion is separated into its own compiled subgraph ([`app/graphs/subgraphs/in
 
 Production agentic systems require quantifiable benchmarks before deploying prompt or model updates.
 
-* **Dataset Sync**: [`tests/eval_dataset.py`](file:///home/ahmad/LangChain-LangGraph-LangFlow-LangSmith/tests/eval_dataset.py) manages a golden benchmark dataset.
-* **LLM Judges**: [`tests/eval_rag.py`](file:///home/ahmad/LangChain-LangGraph-LangFlow-LangSmith/tests/eval_rag.py) implements three automated judges:
+* **Dataset Sync**: [`tests/eval_dataset.py`](../tests/eval_dataset.py) manages a golden benchmark dataset.
+* **LLM Judges**: [`tests/eval_rag.py`](../tests/eval_rag.py) implements three automated judges:
   * `evaluate_faithfulness`: Penalizes hallucinations not grounded in context.
   * `evaluate_correctness`: Measures semantic similarity to ground truth.
   * `evaluate_routing_accuracy`: Checks intent classification accuracy.
@@ -256,13 +256,13 @@ Production agentic systems require quantifiable benchmarks before deploying prom
 When using this repository as a boilerplate for a new RAG project:
 
 1. **Configure Vector Store**:
-   * Change `qdrant_collection_name` in [`app/core/config.py`](file:///home/ahmad/LangChain-LangGraph-LangFlow-LangSmith/app/core/config.py).
-   * Update vector dimensions in [`app/tools/vectorstore.py`](file:///home/ahmad/LangChain-LangGraph-LangFlow-LangSmith/app/tools/vectorstore.py) if switching embedding models (e.g. 768 for `nomic-embed-text`, 1536 for OpenAI `text-embedding-3-small`, 1024 for `bge-large`).
+   * Change `qdrant_collection_name` in [`app/core/config.py`](../app/core/config.py).
+   * Update vector dimensions in [`app/tools/vectorstore.py`](../app/tools/vectorstore.py) if switching embedding models (e.g. 768 for `nomic-embed-text`, 1536 for OpenAI `text-embedding-3-small`, 1024 for `bge-large`).
 2. **Customize Prompts**:
-   * Modify system prompts in [`app/prompts/generator_prompts.py`](file:///home/ahmad/LangChain-LangGraph-LangFlow-LangSmith/app/prompts/generator_prompts.py) to match your domain (medical, legal, financial, internal IT).
+   * Modify system prompts in [`app/prompts/generator_prompts.py`](../app/prompts/generator_prompts.py) to match your domain (medical, legal, financial, internal IT).
 3. **Swap LLM Provider (Optional)**:
-   * To use OpenAI, Anthropic, or Azure instead of Ollama, update [`app/core/llm.py`](file:///home/ahmad/LangChain-LangGraph-LangFlow-LangSmith/app/core/llm.py) to return `ChatOpenAI` or `ChatAnthropic`. The rest of the graph remains 100% identical.
+   * To use OpenAI, Anthropic, or Azure instead of Ollama, update [`app/core/llm.py`](../app/core/llm.py) to return `ChatOpenAI` or `ChatAnthropic`. The rest of the graph remains 100% identical.
 4. **Extend Tools**:
    * Add custom domain APIs (e.g. CRM lookup, ticket creation, SQL reporting) into `app/tools/` and wire them into subgraphs.
 5. **Run Golden Benchmark**:
-   * Add 10–20 domain-specific questions to [`tests/eval_dataset.py`](file:///home/ahmad/LangChain-LangGraph-LangFlow-LangSmith/tests/eval_dataset.py) and execute `python tests/run_evaluation.py --local` to establish your baseline accuracy.
+   * Add 10–20 domain-specific questions to [`tests/eval_dataset.py`](../tests/eval_dataset.py) and execute `python tests/run_evaluation.py --local` to establish your baseline accuracy.

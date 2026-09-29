@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Community Discussions & Ideas
+    url: https://github.com/AhmadAbukhuit/LangChain-LangGraph-LangFlow-LangSmith/discussions
+    about: Ask questions, share architectures, or discuss Agentic RAG patterns.
+  - name: Security Vulnerability Reporting
+    url: https://github.com/AhmadAbukhuit/LangChain-LangGraph-LangFlow-LangSmith/security/advisories/new
+    about: Please report security vulnerabilities privately.

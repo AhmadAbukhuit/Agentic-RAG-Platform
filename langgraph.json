@@ -1,0 +1,9 @@
+{
+  "dependencies": ["."],
+  "graphs": {
+    "agent": "./app/graphs/main_graph.py:master_app",
+    "ingestion": "./app/graphs/subgraphs/ingestion.py:ingestion_app"
+  },
+  "env": ".env",
+  "python_version": "3.12"
+}

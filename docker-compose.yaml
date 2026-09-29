@@ -1,0 +1,81 @@
+services:
+  # LangGraph FastAPI / LangServe Service
+  rag-api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - SERVICE_NAME=agents-service
+      - LANGCHAIN_TRACING_V2=true
+      - LANGCHAIN_API_KEY=${LANGCHAIN_API_KEY:-}
+      - LANGCHAIN_PROJECT=agentic-rag-service
+      - QDRANT_URL=http://qdrant:6333
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - MONGODB_URL=mongodb://mongodb:27017
+      - REDIS_URL=redis://redis:6379
+      - APP_API_KEY=${APP_API_KEY:-}
+    depends_on:
+      - qdrant
+      - ollama
+      - mongodb
+      - redis
+    networks:
+      - InternalNetwork
+
+  # Vector Database (Qdrant with Dense + BM25 Sparse hybrid indexing)
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports:
+      - "6333:6333" # Qdrant REST API
+      - "6334:6334" # Qdrant gRPC API
+    volumes:
+      - qdrant-data:/qdrant/storage
+    networks:
+      - InternalNetwork
+
+  # Distributed In-Memory Cache (Redis)
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - InternalNetwork
+
+  # NoSQL Document Store (MongoDB for raw extracted texts)
+  mongodb:
+    image: mongo:7.0
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-data:/data/db
+    networks:
+      - InternalNetwork
+
+  # Local LLM Inference Sidecar
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    command: >
+      bash -c "ollama serve & 
+      sleep 5 && 
+      ollama pull deepseek-ocr || true && 
+      ollama pull nomic-embed-text && 
+      ollama pull llama3 && 
+      wait"
+    networks:
+      - InternalNetwork
+
+networks:
+  InternalNetwork:
+    driver: bridge
+
+volumes:
+  qdrant-data:
+  mongodb-data:
+  redis-data:
+  ollama-data:

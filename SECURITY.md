@@ -25,7 +25,7 @@ If you discover a security vulnerability or security defect, please report it th
    * Go to the **Security** tab of this repository.
    * Click on **Report a vulnerability** to open a private draft advisory.
 2. **Email Disclosure**:
-   * Send an encrypted or confidential email to `security@ahmadabukhuit.dev` (or the maintainer's primary contact).
+   * Send an encrypted or confidential email to `engahmadaukhuit@gmail.com` (or the maintainer's primary contact).
    * Include the subject line: `[SECURITY] Agentic RAG Vulnerability Report`.
 
 ### What to Include in Your Report

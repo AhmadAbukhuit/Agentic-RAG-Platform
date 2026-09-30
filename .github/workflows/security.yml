@@ -25,7 +25,7 @@ jobs:
       github.event.head_commit.author.username != 'dependabot[bot]'
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Python 3.12
         uses: actions/setup-python@v5
@@ -50,7 +50,7 @@ jobs:
       github.event.head_commit.author.username != 'dependabot[bot]'
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Python 3.12
         uses: actions/setup-python@v5
@@ -75,7 +75,7 @@ jobs:
       github.event.head_commit.author.username != 'dependabot[bot]'
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -99,7 +99,7 @@ jobs:
       issues: write
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Process Issue on Failure or Resolution
         env:

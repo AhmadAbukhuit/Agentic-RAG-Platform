@@ -1,0 +1,47 @@
+# GitHub Automatically Generated Release Notes Configuration
+# Reference: https://docs.github.com/en/repositories/releasing-projects-on-github/automatically-generated-release-notes
+
+changelog:
+  exclude:
+    labels:
+      - "ignore-for-release"
+      - "skip-changelog"
+      - "no-release"
+    authors:
+      - "dependabot[bot]"
+
+  categories:
+    - title: "🚀 New Features & Enhancements"
+      labels:
+        - "feature"
+        - "enhancement"
+        - "feat"
+
+    - title: "🐛 Bug Fixes & Reliability"
+      labels:
+        - "bug"
+        - "fix"
+        - "bugfix"
+
+    - title: "🔒 Security & Vulnerability Hardening"
+      labels:
+        - "security"
+        - "vulnerability"
+
+    - title: "⚡ Performance Improvements & Optimizations"
+      labels:
+        - "performance"
+        - "perf"
+        - "optimization"
+
+    - title: "📚 Documentation & Architectural References"
+      labels:
+        - "documentation"
+        - "docs"
+
+    - title: "🔄 Dependency Updates & Maintenance"
+      labels:
+        - "dependencies"
+        - "chore"
+        - "maintenance"
+        - "refactor"

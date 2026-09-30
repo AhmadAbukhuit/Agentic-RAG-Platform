@@ -37,7 +37,7 @@ class AgentState(TypedDict, total=False):
     question: str
 
     # Long-Term User Memory (Scoped across sessions to user_id)
-    user_id: str | None
+    user_id: str
     user_memories: list[str]
 
     # Caching & Routing
@@ -45,8 +45,8 @@ class AgentState(TypedDict, total=False):
     datasource: str
 
     # Corrective RAG (CRAG) Quality & Transformation
-    retrieval_grade: str | None
-    rewritten_query: str | None
+    retrieval_grade: str
+    rewritten_query: str
 
     # Context & Synthesis (Re-ranked document passages)
     documents: list[str]
@@ -54,7 +54,7 @@ class AgentState(TypedDict, total=False):
 
     # Reflection Loop & Review
     review_status: str
-    review_feedback: str | None
+    review_feedback: str
     retry_count: int
     max_retries: int
 

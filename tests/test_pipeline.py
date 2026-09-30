@@ -238,11 +238,11 @@ def test_agent_state_schema():
         "cache_hit": False,
         "datasource": "vectorstore",
         "retrieval_grade": "relevant",
-        "rewritten_query": None,
+        "rewritten_query": "",
         "documents": ["Policy paragraph 1", "Policy paragraph 2"],
         "draft_answer": "Employees may work remotely 2 days a week.",
         "review_status": "approved",
-        "review_feedback": None,
+        "review_feedback": "",
         "retry_count": 0,
         "max_retries": 2,
         "final_answer": "Employees may work remotely 2 days a week."

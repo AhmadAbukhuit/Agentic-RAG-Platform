@@ -216,3 +216,8 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Document Ingestion Storage
+data/*
+!data/sample.txt
+!data/.gitkeep

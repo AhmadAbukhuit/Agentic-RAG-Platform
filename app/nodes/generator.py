@@ -74,7 +74,7 @@ def draft_response(state: AgentState) -> dict:
 
     return {
         "draft_answer": draft_content,
-        "review_feedback": None  # Reset feedback once addressed
+        "review_feedback": "",  # Reset feedback once addressed
     }
 
 
@@ -101,15 +101,20 @@ def review_response(state: AgentState) -> dict:
         feedback = decision.feedback
     except Exception as e:
         print(f"Structured review failed, evaluating via text heuristic: {e}")
-        raw_text = (review_prompt_template | llm).invoke({
-            "context": context,
-            "question": question,
-            "draft_answer": draft_answer
-        }).content.lower()
-        if "revision" in raw_text or "hallucinat" in raw_text or "incorrect" in raw_text:
-            status = "revision_needed"
-            feedback = "Draft contains unverified claims or omissions according to context."
-        else:
+        try:
+            raw_text = (review_prompt_template | llm).invoke({
+                "context": context,
+                "question": question,
+                "draft_answer": draft_answer
+            }).content.lower()
+            if "revision" in raw_text or "hallucinat" in raw_text or "incorrect" in raw_text:
+                status = "revision_needed"
+                feedback = "Draft contains unverified claims or omissions according to context."
+            else:
+                status = "approved"
+                feedback = ""
+        except Exception as e2:
+            print(f"LLM review invocation failed ({e2}). Defaulting to approved.")
             status = "approved"
             feedback = ""
 
@@ -117,13 +122,13 @@ def review_response(state: AgentState) -> dict:
     if status == "revision_needed" and retry_count >= max_retries:
         print(f"Max revision retries ({max_retries}) reached. Finalizing current draft.")
         status = "approved"
-        feedback = None
+        feedback = ""
 
     print(f"---REVIEW RESULT: status='{status}', retry_count={retry_count}/{max_retries}---")
 
     result = {
         "review_status": status,
-        "review_feedback": feedback if status == "revision_needed" else None,
+        "review_feedback": feedback if status == "revision_needed" else "",
         "retry_count": retry_count,
     }
 

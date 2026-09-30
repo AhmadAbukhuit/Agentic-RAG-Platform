@@ -2,18 +2,42 @@ services:
   # LangGraph FastAPI / LangServe Service
   agents-service:
     build: .
+    container_name: agents-service
     ports:
-      - "8000:8000"
+      - "${PORT:-8000}:8000"
+    env_file:
+      - path: .env
+        required: false
     environment:
-      - SERVICE_NAME=agents-service
-      - LANGCHAIN_TRACING_V2=true
-      - LANGCHAIN_API_KEY=${LANGCHAIN_API_KEY:-}
-      - LANGCHAIN_PROJECT=agentic-rag-service
-      - QDRANT_URL=http://qdrant:6333
-      - OLLAMA_BASE_URL=http://ollama:11434
-      - MONGODB_URL=mongodb://mongodb:27017
-      - REDIS_URL=redis://redis:6379
+      - SERVICE_NAME=${SERVICE_NAME:-agents-service}
+      - SERVICE_DESCRIPTION=${SERVICE_DESCRIPTION:-Agentic RAG & Multi-Agent Orchestration Service}
+      - SERVICE_VERSION=${SERVICE_VERSION:-1.0.0}
+      - LANGSMITH_TRACING=${LANGSMITH_TRACING:-${LANGCHAIN_TRACING_V2:-false}}
+      - LANGSMITH_ENDPOINT=${LANGSMITH_ENDPOINT:-${LANGCHAIN_ENDPOINT:-https://eu.api.smith.langchain.com}}
+      - LANGSMITH_API_KEY=${LANGSMITH_API_KEY:-${LANGCHAIN_API_KEY:-}}
+      - LANGSMITH_PROJECT=${LANGSMITH_PROJECT:-${LANGCHAIN_PROJECT:-agentic-rag-platform}}
+      - LANGCHAIN_TRACING_V2=${LANGSMITH_TRACING:-${LANGCHAIN_TRACING_V2:-false}}
+      - LANGCHAIN_ENDPOINT=${LANGSMITH_ENDPOINT:-${LANGCHAIN_ENDPOINT:-https://eu.api.smith.langchain.com}}
+      - LANGCHAIN_API_KEY=${LANGSMITH_API_KEY:-${LANGCHAIN_API_KEY:-}}
+      - LANGCHAIN_PROJECT=${LANGSMITH_PROJECT:-${LANGCHAIN_PROJECT:-agentic-rag-platform}}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - LLM_MODEL=${LLM_MODEL:-llama3}
+      - VISION_MODEL=${VISION_MODEL:-deepseek-ocr}
+      - EMBEDDING_MODEL=${EMBEDDING_MODEL:-zylonai/multilingual-e5-large}
+      - EMBEDDING_DIMENSION=${EMBEDDING_DIMENSION:-1024}
+      - QDRANT_URL=${QDRANT_URL:-http://qdrant:6333}
+      - QDRANT_COLLECTION_NAME=${QDRANT_COLLECTION_NAME:-envision_docs}
+      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://ollama:11434}
+      - MONGODB_URL=${MONGODB_URL:-mongodb://mongodb:27017}
+      - MONGODB_DATABASE=${MONGODB_DATABASE:-rag_db}
+      - MONGODB_COLLECTION=${MONGODB_COLLECTION:-raw_documents}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379}
+      - REDIS_CACHE_TTL=${REDIS_CACHE_TTL:-86400}
+      - ENABLE_REDIS_CACHE=${ENABLE_REDIS_CACHE:-true}
       - APP_API_KEY=${APP_API_KEY:-}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-*}
+    volumes:
+      - ./data:/app/data
     depends_on:
       - qdrant
       - ollama
@@ -25,9 +49,10 @@ services:
   # Vector Database (Qdrant with Dense + BM25 Sparse hybrid indexing)
   qdrant:
     image: qdrant/qdrant:latest
+    container_name: qdrant
     ports:
-      - "6333:6333" # Qdrant REST API
-      - "6334:6334" # Qdrant gRPC API
+      - "${QDRANT_REST_PORT:-6333}:6333" # Qdrant REST API
+      - "${QDRANT_GRPC_PORT:-6334}:6334" # Qdrant gRPC API
     volumes:
       - qdrant-data:/qdrant/storage
     networks:
@@ -36,8 +61,9 @@ services:
   # Distributed In-Memory Cache (Redis)
   redis:
     image: redis:7-alpine
+    container_name: redis
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT:-6379}:6379"
     volumes:
       - redis-data:/data
     networks:
@@ -46,8 +72,9 @@ services:
   # NoSQL Document Store (MongoDB for raw extracted texts)
   mongodb:
     image: mongo:7.0
+    container_name: mongodb
     ports:
-      - "27017:27017"
+      - "${MONGODB_PORT:-27017}:27017"
     volumes:
       - mongodb-data:/data/db
     networks:
@@ -56,17 +83,21 @@ services:
   # Local LLM Inference Sidecar
   ollama:
     image: ollama/ollama:latest
+    container_name: ollama
     ports:
-      - "11434:11434"
+      - "${OLLAMA_PORT:-11434}:11434"
     volumes:
       - ollama-data:/root/.ollama
+    env_file:
+      - path: .env
+        required: false
+    entrypoint: ["/bin/sh", "-c"]
     command: >
-      bash -c "ollama serve & 
+      "ollama serve & 
       sleep 5 && 
-      ollama pull deepseek-ocr || true && 
-      ollama pull nomic-embed-text && 
-      ollama pull zylonai/multilingual-e5-large && 
-      ollama pull llama3 && 
+      ollama pull ${VISION_MODEL:-deepseek-ocr} || true && 
+      ollama pull ${EMBEDDING_MODEL:-zylonai/multilingual-e5-large} && 
+      ollama pull ${LLM_MODEL:-llama3} && 
       wait"
     networks:
       - InternalNetwork

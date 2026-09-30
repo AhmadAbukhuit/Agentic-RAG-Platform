@@ -41,11 +41,15 @@ def grade_documents(state: AgentState) -> dict:
         print(f"---CRAG EVALUATION: score='{decision.score}', reasoning='{decision.reasoning}'---")
     except Exception as e:
         print(f"Warning: Structured grading failed ({e}). Using heuristic parsing.")
-        raw_output = (grade_prompt_template | llm).invoke({
-            "context": context,
-            "question": question
-        }).content.lower()
-        grade = "relevant" if "yes" in raw_output else "irrelevant"
+        try:
+            raw_output = (grade_prompt_template | llm).invoke({
+                "context": context,
+                "question": question
+            }).content.lower()
+            grade = "relevant" if "yes" in raw_output else "irrelevant"
+        except Exception as e2:
+            print(f"LLM grading invocation failed ({e2}). Defaulting to relevant.")
+            grade = "relevant"
 
     print(f"---CRAG GRADE: {grade.upper()}---")
     return {"retrieval_grade": grade}

@@ -7,9 +7,19 @@ from tools.memory_store import recall_user_memories, save_user_memory
 
 def recall_memory(state: AgentState) -> dict:
     """Recalls long-term user preferences and resolves the active question from messages or input."""
-    user_id = state.get("user_id")
-    question = state.get("question", "")
-    messages = state.get("messages", [])
+    # Normalize state if passed as Pydantic model from LangServe input_type
+    if hasattr(state, "model_dump"):
+        state_dict = state.model_dump()
+    elif hasattr(state, "dict"):
+        state_dict = state.dict()
+    elif isinstance(state, dict):
+        state_dict = state
+    else:
+        state_dict = dict(state)
+
+    user_id = state_dict.get("user_id")
+    question = state_dict.get("question", "")
+    messages = state_dict.get("messages", [])
 
     # If question is empty, extract text from the latest HumanMessage in short-term history
     if not question and messages:

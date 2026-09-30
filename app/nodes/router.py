@@ -27,11 +27,14 @@ def route_question(state: AgentState) -> dict:
         selected_datasource = decision.datasource
     except Exception as e:
         print(f"Structured output failed, falling back to heuristic/text parsing: {e}")
-        # Robust fallback if local model doesn't support tool/structured calls natively
-        raw_output = (router_prompt_template | llm).invoke({"question": question}).content.lower()
-        if "web_search" in raw_output or "web" in raw_output:
-            selected_datasource = "web_search"
-        else:
+        try:
+            raw_output = (router_prompt_template | llm).invoke({"question": question}).content.lower()
+            if "web_search" in raw_output or "web" in raw_output:
+                selected_datasource = "web_search"
+            else:
+                selected_datasource = "vectorstore"
+        except Exception as e2:
+            print(f"LLM routing invocation failed ({e2}). Defaulting to vectorstore.")
             selected_datasource = "vectorstore"
 
     print(f"---ROUTED TO: {selected_datasource}---")

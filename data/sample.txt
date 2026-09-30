@@ -1,0 +1,12 @@
+# Agentic RAG Platform - Sample Knowledge Base Document
+
+Welcome to the Agentic RAG Platform. This document provides core reference information for testing the ingestion and retrieval pipeline.
+
+## Overview
+The Agentic RAG Platform combines LangGraph workflows, Qdrant hybrid search (dense + BM25 sparse), MongoDB raw document storage, Redis semantic caching, and Ollama local inference.
+
+## Key Features
+1. Multi-Agent Router: Routes questions between cached answers, vector search, and web search.
+2. Corrective RAG (CRAG): Evaluates retrieved document relevance and rewrites queries if retrieval is unsatisfactory.
+3. Self-Reflective Drafter & Reviewer: Generates answers and critiques them for factual accuracy and grounded citations.
+4. Long-Term Memory: Remembers user preferences and context across conversation sessions.

@@ -1,0 +1,86 @@
+name: Release Pipeline
+
+"on":
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: "Release Tag version (e.g. v1.0.0)"
+        required: true
+        default: "v1.0.0"
+
+permissions:
+  contents: write
+  packages: write
+  issues: read
+  pull-requests: read
+
+jobs:
+  validate:
+    name: Run Quality & Lint Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install Ruff & Dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          pip install ruff
+          pip install -r requirements.txt
+
+      - name: Run Ruff Lint
+        run: ruff check .
+
+      - name: Run Pytest Suite
+        env:
+          SERVICE_NAME: release-test
+          ENABLE_REDIS_CACHE: "true"
+        run: pytest tests/test_pipeline.py -v
+
+  build-and-release:
+    name: Build Docker Image & Publish Release
+    needs: [validate]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine Release Tag
+        id: release_tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "TAG=${{ github.event.inputs.tag_name }}" >> $GITHUB_OUTPUT
+          else
+            echo "TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker Container
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          tags: ${{ github.repository }}:${{ steps.release_tag.outputs.TAG }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.release_tag.outputs.TAG }}
+          name: Release ${{ steps.release_tag.outputs.TAG }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true

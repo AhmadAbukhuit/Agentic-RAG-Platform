@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from core.config import settings
 
@@ -58,7 +58,7 @@ def save_user_memory(user_id: str | None, memory_text: str) -> bool:
                 {"$setOnInsert": {
                     "user_id": user_id,
                     "memory": clean_memory,
-                    "created_at": datetime.now(timezone.utc).isoformat()
+                    "created_at": datetime.now(UTC).isoformat()
                 }},
                 upsert=True
             )
@@ -84,8 +84,8 @@ def clear_user_memories(user_id: str | None) -> bool:
     if col is not None:
         try:
             col.delete_many({"user_id": user_id})
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"MongoDB memory clear error: {e}")
 
     _LOCAL_USER_MEMORIES.pop(user_id, None)
     return True

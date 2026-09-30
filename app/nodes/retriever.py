@@ -21,6 +21,8 @@ def query_qdrant_hybrid(state: AgentState) -> dict:
             prefer_grpc=False,
             collection_name=settings.qdrant_collection_name,
             retrieval_mode=RetrievalMode.HYBRID,
+            vector_name="dense",
+            sparse_vector_name="sparse",
         )
 
         # Retrieve top 15 candidate chunks for the cross-encoder re-ranking stage

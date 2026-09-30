@@ -257,7 +257,7 @@ When using this repository as a boilerplate for a new RAG project:
 
 1. **Configure Vector Store**:
    * Change `qdrant_collection_name` in [`app/core/config.py`](../app/core/config.py).
-   * Update vector dimensions in [`app/tools/vectorstore.py`](../app/tools/vectorstore.py) if switching embedding models (e.g. 768 for `nomic-embed-text`, 1536 for OpenAI `text-embedding-3-small`, 1024 for `bge-large`).
+   * Update vector dimensions in [`app/tools/vectorstore.py`](../app/tools/vectorstore.py) or `EMBEDDING_DIMENSION` in config/env (e.g. 1024 for `zylonai/multilingual-e5-large`, 1536 for OpenAI `text-embedding-3-small`, 768 for `nomic-embed-text`).
 2. **Customize Prompts**:
    * Modify system prompts in [`app/prompts/generator_prompts.py`](../app/prompts/generator_prompts.py) to match your domain (medical, legal, financial, internal IT).
 3. **Swap LLM Provider (Optional)**:

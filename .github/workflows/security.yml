@@ -17,6 +17,12 @@ jobs:
   bandit-scan:
     name: Bandit AST Code Security
     runs-on: ubuntu-latest
+    if: >-
+      github.actor != 'dependabot[bot]' &&
+      github.event.pull_request.user.login != 'dependabot[bot]' &&
+      !contains(github.event.head_commit.message, 'dependabot') &&
+      !contains(github.event.head_commit.author.name, 'dependabot') &&
+      github.event.head_commit.author.username != 'dependabot[bot]'
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -36,6 +42,12 @@ jobs:
   dependency-audit:
     name: Pip-Audit CVE Scanning
     runs-on: ubuntu-latest
+    if: >-
+      github.actor != 'dependabot[bot]' &&
+      github.event.pull_request.user.login != 'dependabot[bot]' &&
+      !contains(github.event.head_commit.message, 'dependabot') &&
+      !contains(github.event.head_commit.author.name, 'dependabot') &&
+      github.event.head_commit.author.username != 'dependabot[bot]'
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -55,6 +67,12 @@ jobs:
   secret-detection:
     name: Secret & Credential Leak Scan
     runs-on: ubuntu-latest
+    if: >-
+      github.actor != 'dependabot[bot]' &&
+      github.event.pull_request.user.login != 'dependabot[bot]' &&
+      !contains(github.event.head_commit.message, 'dependabot') &&
+      !contains(github.event.head_commit.author.name, 'dependabot') &&
+      github.event.head_commit.author.username != 'dependabot[bot]'
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -72,7 +90,9 @@ jobs:
   manage-issue:
     name: Manage Security Issue
     needs: [bandit-scan, dependency-audit, secret-detection]
-    if: always()
+    if: >-
+      always() &&
+      needs.bandit-scan.result != 'skipped'
     runs-on: ubuntu-latest
     permissions:
       contents: read

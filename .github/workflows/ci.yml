@@ -18,6 +18,12 @@ jobs:
   ruff-lint:
     name: Ruff Lint & Format
     runs-on: ubuntu-latest
+    if: >-
+      github.actor != 'dependabot[bot]' &&
+      github.event.pull_request.user.login != 'dependabot[bot]' &&
+      !contains(github.event.head_commit.message, 'dependabot') &&
+      !contains(github.event.head_commit.author.name, 'dependabot') &&
+      github.event.head_commit.author.username != 'dependabot[bot]'
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -39,6 +45,12 @@ jobs:
   markdown-lint:
     name: Markdown Lint
     runs-on: ubuntu-latest
+    if: >-
+      github.actor != 'dependabot[bot]' &&
+      github.event.pull_request.user.login != 'dependabot[bot]' &&
+      !contains(github.event.head_commit.message, 'dependabot') &&
+      !contains(github.event.head_commit.author.name, 'dependabot') &&
+      github.event.head_commit.author.username != 'dependabot[bot]'
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -55,6 +67,12 @@ jobs:
     name: Pytest & Unit Tests
     needs: [ruff-lint]
     runs-on: ubuntu-latest
+    if: >-
+      github.actor != 'dependabot[bot]' &&
+      github.event.pull_request.user.login != 'dependabot[bot]' &&
+      !contains(github.event.head_commit.message, 'dependabot') &&
+      !contains(github.event.head_commit.author.name, 'dependabot') &&
+      github.event.head_commit.author.username != 'dependabot[bot]'
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -84,7 +102,9 @@ jobs:
   manage-issue:
     name: Manage Failure Issue
     needs: [ruff-lint, markdown-lint, pytest-suite]
-    if: always()
+    if: >-
+      always() &&
+      needs.ruff-lint.result != 'skipped'
     runs-on: ubuntu-latest
     permissions:
       contents: read

@@ -1,6 +1,6 @@
 # Web Framework & API Server
 fastapi>=0.141.1,<1.0.0
-python-multipart>=0.0.12,<1.0.0
+python-multipart>=0.0.32,<1.0.0
 uvicorn[standard]>=0.54.0,<1.0.0
 langserve[all]>=0.3.3,<0.4.0
 

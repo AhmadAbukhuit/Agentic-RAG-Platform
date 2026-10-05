@@ -77,7 +77,7 @@ jobs:
           tags: ${{ github.repository }}:${{ steps.release_tag.outputs.TAG }}
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ steps.release_tag.outputs.TAG }}
           name: Release ${{ steps.release_tag.outputs.TAG }}
